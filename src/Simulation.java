@@ -97,7 +97,7 @@ public class Simulation {
             int x1 = (int) ((endTA - startTA) * r1 + startTA);
             double y1 = (maxTA * r2);
 
-            if (functionIA(x1) >= y1) {
+            if (functionTA(x1) >= y1) {
                 TA = x1;
                 return;
             }
