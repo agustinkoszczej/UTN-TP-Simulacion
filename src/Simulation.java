@@ -3,7 +3,15 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Arrays;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
+
 public class Simulation {
+
+    static Logger logger;
+    FileHandler fh;
 
     //region VARIABLES
     //VARIABLES EXÓGENAS
@@ -49,6 +57,8 @@ public class Simulation {
     public static void main(String[] args) {
         Simulation simulation = new Simulation();
 
+        simulation.initLogs();
+
         //region INGRESO
         Scanner in = new Scanner(System.in);
         System.out.println("Ingrese cantidad de puestos (threads): ");
@@ -60,6 +70,25 @@ public class Simulation {
         simulation.run();
         simulation.calculateResults();
         simulation.printResults();
+    }
+    //endregion
+
+    //region LOGS
+    public void initLogs() {
+        try {
+            String path = System.getProperty("user.dir") + "\\simulation.log";
+            fh = new FileHandler(path);
+            logger = Logger.getLogger(path);
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+            logger.info("initLogs successful");
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     //endregion
 
@@ -84,6 +113,7 @@ public class Simulation {
 
             if (functionIA(x1) >= y1) {
                 IA = x1;
+                logger.info("IA generated = " + IA);
                 return;
             }
         }
@@ -99,6 +129,7 @@ public class Simulation {
 
             if (functionTA(x1) >= y1) {
                 TA = x1;
+                logger.info("TA generated = " + TA);
                 return;
             }
         }
@@ -110,14 +141,14 @@ public class Simulation {
         //Funciones
         startIA = 0;
         endIA = 999;
-        maxIA = 1;
+        maxIA = 1; //FIXME: No se si es 1
 
         startTA = 0;
         endTA = 999;
-        maxTA = 1;
+        maxTA = 1; //FIXME: No se si es 1
 
-        //FIXME: El HV le asigno el tiempo final para el máximo tiempo de atención posible
-        HV = TF.add(BigInteger.valueOf(endTA)); //TF + endTA
+        //FIXME: El HV le debería asignar el tiempo final más el máximo tiempo de atención posible, pero podría ser más D:
+        HV = BigInteger.valueOf(Long.MAX_VALUE);//TF.add(BigInteger.valueOf(endTA)); //TF + endTA
 
         T = BigInteger.valueOf(0);
         NS = 0;
@@ -170,6 +201,7 @@ public class Simulation {
     }
 
     public void printResults() {
+        System.out.println("Cantidad de llegadas: " + NT);
         System.out.println("Promedio permanencia sistema: " + PPS);
         System.out.println("Promedio espera cola: " + PEC);
         System.out.println("Promedio tiempo atención: " + PTA);
@@ -179,11 +211,13 @@ public class Simulation {
     //region RUNNER
     public void run() {
         this.initConditions();
-        int minIndex = this.getMinThreadIndex();
 
-        while (T.compareTo(TF) < 0) { //T<TF
+        while ((T.compareTo(TF) < 0) || (NS != 0)) { //T<TF
+            logger.info("--------------START-----------------------");
+            logger.info("START: T = " + T + ", NS = " + NS + ", TPLL = " + TPLL + ", TPS = " + Arrays.toString(TPS));
+            int minIndex = this.getMinThreadIndex();
             if (TPLL.compareTo(TPS[minIndex]) <= 0) { //TPLL <= TPS[minIndex]
-                //Llegada
+                //LLEGADA
                 T = TPLL;
                 NT = NT + 1;
                 STLL = STLL.add(TPLL);
@@ -196,8 +230,9 @@ public class Simulation {
                     TPS[freeIndex] = T.add(BigInteger.valueOf(TA)); //T + TA;
                     STA = STA.add(BigInteger.valueOf(TA)); //STA + TA;
                 }
+                logger.info("EVENT: "+ NT + "º ARRIVE");
             } else {
-                //Salida
+                //SALIDA
                 T = TPS[minIndex];
                 STS = STS.add(T); //STS + T;
                 NS = NS - 1;
@@ -208,7 +243,12 @@ public class Simulation {
                 } else {
                     TPS[minIndex] = HV;
                 }
+                logger.info("EVENT: EXIT");
             }
+            if ((NS != 0) && (T.compareTo(TF) >= 0)) //T>=TF
+                TPLL = HV;
+            logger.info("END: T = " + T + ", NS = " + NS + ", TPLL = " + TPLL + ", TPS = " + Arrays.toString(TPS));
+            logger.info("--------------END-----------------------");
         }
     }
     //endregion
