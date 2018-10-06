@@ -60,6 +60,7 @@ public class Simulation extends Variables{
         logResults.info("--------------RESULTS-----------------------");
         logResults.info("| Cantidad de puestos (threads): " + N + "|");
         logResults.info("| Tamaño máximo de cola: " + MC + "|");
+        logResults.info("| Tiempo Final (en ms): " + TF + "|");
         logResults.info("| Cantidad de llegadas: " + NT + "|");
         logResults.info("| Promedio permanencia sistema: " + PPS + "|");
         logResults.info("| Promedio espera cola: " + PEC + "|");
@@ -168,6 +169,9 @@ public class Simulation extends Variables{
     }
 
     public void printResults() {
+        System.out.println("Cantidad de puestos (threads): " + N);
+        System.out.println("Tamaño máximo de cola: " + MC);
+        System.out.println("Tiempo Final (en ms): " + TF);
         System.out.println("Cantidad de llegadas: " + NT);
         System.out.println("Promedio permanencia sistema: " + PPS);
         System.out.println("Promedio espera cola: " + PEC);
