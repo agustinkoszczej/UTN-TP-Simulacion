@@ -1,0 +1,10 @@
+INFO:initLogs successful
+INFO:--------------RESULTS-----------------------
+INFO:| Cantidad de puestos (threads): 10|
+INFO:| Tamaño máximo de cola: 5|
+INFO:| Cantidad de llegadas: 368|
+INFO:| Promedio permanencia sistema: 3|
+INFO:| Promedio espera cola: 0|
+INFO:| Promedio tiempo atención: 3|
+INFO:| Porcentaje de rechazos: 51% |
+INFO:--------------RESULTS-----------------------

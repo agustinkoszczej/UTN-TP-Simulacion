@@ -3,132 +3,101 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Arrays;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.logging.FileHandler;
-import java.util.logging.SimpleFormatter;
+import java.io.IOException;
 
-public class Simulation {
-
-    static Logger logger;
-    FileHandler fh;
-
-    //region VARIABLES
-    //VARIABLES EXÓGENAS
-    int IA; //Intervalo arribo búsqueda
-    int TA; //Tiempo atención thread
-
-    //VARIABLES ENDÓGENAS
-    static int N; //Cantidad threads
-    int NS; //Número búsquedas en el sistema
-
-    //RESULTADOS
-    int PPS; //Promedio permanencia sistema
-    int PEC; //Promedio espera cola
-    int PTA; //Promedio tiempo atención
-
-    //AUXS RESULTADOS
-    int NT; //Número total elementos en sistema
-    BigInteger STLL; //Sumatoria tiempos de llegada
-    BigInteger STS; //Sumatoria tiempos de salida
-    BigInteger STA; //Sumatoria tiempos de atención
-
-    //TABLA EVENTOS FUTUROS (T.E.F)
-    BigInteger TPLL; //Tiempo próxima llegada
-    BigInteger[] TPS; //Tiempo próxima salida
-
-    //TIEMPOS
-    BigInteger T; //Tiempo;
-    static BigInteger TF; // Tiempo final
-    BigInteger HV; //High Value
-
-    //FUNCIÓN DENSIDAD DE PROBABILIDAD (F.D.P)
-    //IA
-    int startIA;
-    int endIA;
-    int maxIA;
-    //TA
-    int startTA;
-    int endTA;
-    int maxTA;
-    //endregion
+public class Simulation extends Variables{
 
     //region MAIN
     public static void main(String[] args) {
         Simulation simulation = new Simulation();
 
-        simulation.initLogs();
-
         //region INGRESO
         Scanner in = new Scanner(System.in);
         System.out.println("Ingrese cantidad de puestos (threads): ");
         N = in.nextInt();
+        System.out.println("Ingrese tamaño máximo de cola: ");
+        MC = in.nextInt();
         System.out.println("Ingrese tiempo final (en ms): ");
         TF = in.nextBigInteger();
         //endregion
 
+        simulation.initLogs();
         simulation.run();
         simulation.calculateResults();
         simulation.printResults();
+        simulation.logResults();
     }
     //endregion
 
     //region LOGS
     public void initLogs() {
         try {
-            String path = System.getProperty("user.dir") + "\\simulation.log";
-            fh = new FileHandler(path);
-            logger = Logger.getLogger(path);
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-            logger.info("initLogs successful");
+            String path = System.getProperty("user.dir");
+            //Logs
+            fhLogs = new FileHandler(path + "\\logs.log");
+            logger = Logger.getLogger(path + "\\logs.log");
+            logger.addHandler(fhLogs);
+            //Results
+            fhResults = new FileHandler(path + "\\results.log");
+            logResults = Logger.getLogger(path + "\\results.log");
+            logResults.addHandler(fhResults);
 
+            fhLogs.setFormatter(new LogFormatter());
+            fhResults.setFormatter(new LogFormatter());
+
+            logger.info("initLogs successful");
+            logResults.info("initLogs successful");
         } catch (SecurityException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void logResults() {
+        logResults.info("--------------RESULTS-----------------------");
+        logResults.info("| Cantidad de puestos (threads): " + N + "|");
+        logResults.info("| Tamaño máximo de cola: " + MC + "|");
+        logResults.info("| Cantidad de llegadas: " + NT + "|");
+        logResults.info("| Promedio permanencia sistema: " + PPS + "|");
+        logResults.info("| Promedio espera cola: " + PEC + "|");
+        logResults.info("| Promedio tiempo atención: " + PTA + "|");
+        logResults.info("| Porcentaje de rechazos: " + PR + "% |");
+        logResults.info("--------------RESULTS-----------------------");
+    }
     //endregion
 
     //region FUNCTIONS OPERATIONS
-    public int functionIA(int x) {
-        return (4 * x + 5); //FIXME: funcion lineal hardcodeada para testear
+    public double functionIA(double x) {
+        return (1 - Math.pow(1 - x, 0.834)) / Math.pow(1 - x, 0.834);
     }
 
-    public int functionTA(int x) {
-        return (4 * x + 5); //FIXME: funcion lineal hardcodeada para testear
+    public double functionTA(double x) {
+        return (LAMBDA_TA * K_TA * Math.pow(x / BETA_TA, LAMBDA_TA - 1)) / (BETA_TA * Math.pow(1 + Math.pow(x / BETA_TA, LAMBDA_TA), K_TA + 1));
     }
     //endregion
 
     //region GENERATORS OPERATIONS
     public void generateIA() {
-        while (true) {
-            double r1 = new Random().nextDouble();
-            double r2 = new Random().nextDouble();
-
-            int x1 = (int) ((endIA - startIA) * r1 + startIA);
-            double y1 = (maxIA * r2);
-
-            if (functionIA(x1) >= y1) {
-                IA = x1;
-                logger.info("IA generated = " + IA);
-                return;
-            }
-        }
+        //MÉTODO DE LA FUNCIÓN INVERSA
+        double r = new Random().nextDouble();
+        IA = (int) functionIA(r);
+        logger.info("IA generated = " + IA);
     }
 
     public void generateTA() {
+        //MÉTODO DEL RECHAZO
         while (true) {
             double r1 = new Random().nextDouble();
             double r2 = new Random().nextDouble();
 
-            int x1 = (int) ((endTA - startTA) * r1 + startTA);
+            double x1 = ((endTA - startTA) * r1 + startTA);
             double y1 = (maxTA * r2);
 
             if (functionTA(x1) >= y1) {
-                TA = x1;
+                TA = (int) x1;
                 logger.info("TA generated = " + TA);
                 return;
             }
@@ -139,10 +108,6 @@ public class Simulation {
     //region INITIALIZERS
     public void initConditions() {
         //Funciones
-        startIA = 0;
-        endIA = 999;
-        maxIA = 1; //FIXME: No se si es 1
-
         startTA = 0;
         endTA = 999;
         maxTA = 1; //FIXME: No se si es 1
@@ -152,7 +117,8 @@ public class Simulation {
 
         T = BigInteger.valueOf(0);
         NS = 0;
-        TPLL = BigInteger.valueOf(0);
+        this.generateIA();
+        TPLL = BigInteger.valueOf(IA);
         TPS = new BigInteger[N];
         Arrays.fill(TPS, HV); //Lleno todos los puestos de atención a libres
 
@@ -198,6 +164,7 @@ public class Simulation {
         PPS = ((STS.subtract(STLL)).divide(BigInteger.valueOf(NT))).intValue(); //( STS - STLL) / NT;
         PEC = ((STS.subtract(STLL)).subtract(STA).divide(BigInteger.valueOf(NT))).intValue(); //(STS - STLL - STA) / NT;
         PTA = (STA.divide(BigInteger.valueOf(NT))).intValue(); //STA / NT;
+        PR = (ARR * 100 / NT);
     }
 
     public void printResults() {
@@ -205,6 +172,7 @@ public class Simulation {
         System.out.println("Promedio permanencia sistema: " + PPS);
         System.out.println("Promedio espera cola: " + PEC);
         System.out.println("Promedio tiempo atención: " + PTA);
+        System.out.println("Porcentaje de rechazos: " + PR + "%");
     }
     //endregion OPERA
 
@@ -220,17 +188,22 @@ public class Simulation {
                 //LLEGADA
                 T = TPLL;
                 NT = NT + 1;
-                STLL = STLL.add(TPLL);
                 this.generateIA();
                 TPLL = T.add(BigInteger.valueOf(IA)); //T + IA;
-                NS = NS + 1;
-                if (NS <= N) {
-                    int freeIndex = findFreeThreadIndex();
-                    this.generateTA();
-                    TPS[freeIndex] = T.add(BigInteger.valueOf(TA)); //T + TA;
-                    STA = STA.add(BigInteger.valueOf(TA)); //STA + TA;
+                if (NS != MC) {
+                    STLL = STLL.add(T);
+                    NS = NS + 1;
+                    if (NS <= N) {
+                        int freeIndex = findFreeThreadIndex();
+                        this.generateTA();
+                        TPS[freeIndex] = T.add(BigInteger.valueOf(TA)); //T + TA;
+                        STA = STA.add(BigInteger.valueOf(TA)); //STA + TA;
+                    }
+                    logger.info("EVENT: " + NT + "º ARRIVE");
+                } else {
+                    ARR = ARR + 1;
+                    logger.info("ONE REGRET");
                 }
-                logger.info("EVENT: "+ NT + "º ARRIVE");
             } else {
                 //SALIDA
                 T = TPS[minIndex];
