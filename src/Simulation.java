@@ -59,13 +59,13 @@ public class Simulation extends Variables {
 
     public void logResults() {
         logResults.info("--------------RESULTS-----------------------");
-        logResults.info("| Cantidad de puestos (threads): " + N + "|");
-        logResults.info("| Tamaño máximo de cola: " + MC + "|");
-        logResults.info("| Tiempo Final (en ms): " + TF + "|");
-        logResults.info("| Cantidad de llegadas: " + NT + "|");
-        logResults.info("| Promedio permanencia sistema: " + new DecimalFormat("##.##").format(PPS / 60) + " en minutos |");
-        logResults.info("| Promedio espera cola: " + new DecimalFormat("##.##").format(PEC / 60) + " en minutos |");
-        logResults.info("| Promedio tiempo atención: " + PTA + " en segundos |");
+        logResults.info("| Cantidad de puestos (threads): " + N + " |");
+        logResults.info("| Tamaño máximo de cola: " + MC + " |");
+        logResults.info("| Tiempo Final (en segs): " + TF + " |");
+        logResults.info("| Cantidad de llegadas: " + NT + " |");
+        logResults.info("| Promedio permanencia sistema (en mins): " + new DecimalFormat("##.##").format(PPS / 60) + " |");
+        logResults.info("| Promedio espera cola (en mins): " + new DecimalFormat("##.##").format(PEC / 60) + " |");
+        logResults.info("| Promedio tiempo atención (en segs): " + PTA + " |");
         logResults.info("| Porcentaje de rechazos: " + PR + "% |");
         logResults.info("--------------RESULTS-----------------------");
     }
@@ -171,11 +171,11 @@ public class Simulation extends Variables {
     public void printResults() {
         System.out.println("Cantidad de puestos (threads): " + N);
         System.out.println("Tamaño máximo de cola: " + MC);
-        System.out.println("Tiempo Final (en seg): " + TF);
+        System.out.println("Tiempo Final (en segs): " + TF);
         System.out.println("Cantidad de llegadas: " + NT);
-        System.out.println("Promedio permanencia sistema: " + new DecimalFormat("##.##").format(PPS / 60) + " minutos");
-        System.out.println("Promedio espera cola: " + new DecimalFormat("##.##").format(PEC / 60) + " minutos");
-        System.out.println("Promedio tiempo atención: " + PTA + " segundos");
+        System.out.println("Promedio permanencia sistema (en mins): " + new DecimalFormat("##.##").format(PPS / 60));
+        System.out.println("Promedio espera cola: (en mins) " + new DecimalFormat("##.##").format(PEC / 60));
+        System.out.println("Promedio tiempo atención (en segs): " + PTA);
         System.out.println("Porcentaje de rechazos: " + PR + "%");
     }
     //endregion OPERA

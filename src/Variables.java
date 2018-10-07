@@ -55,4 +55,3 @@ public class Variables {
     double maxTA;
     //endregion
 }
-/** VIVA EL ANIME WACHO!*/
