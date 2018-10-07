@@ -1,4 +1,5 @@
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Arrays;
@@ -7,7 +8,7 @@ import java.util.logging.Logger;
 import java.util.logging.FileHandler;
 import java.io.IOException;
 
-public class Simulation extends Variables{
+public class Simulation extends Variables {
 
     //region MAIN
     public static void main(String[] args) {
@@ -19,7 +20,7 @@ public class Simulation extends Variables{
         N = in.nextInt();
         System.out.println("Ingrese tamaño máximo de cola: ");
         MC = in.nextInt();
-        System.out.println("Ingrese tiempo final (en ms): ");
+        System.out.println("Ingrese tiempo final (en seg): ");
         TF = in.nextBigInteger();
         //endregion
 
@@ -62,9 +63,9 @@ public class Simulation extends Variables{
         logResults.info("| Tamaño máximo de cola: " + MC + "|");
         logResults.info("| Tiempo Final (en ms): " + TF + "|");
         logResults.info("| Cantidad de llegadas: " + NT + "|");
-        logResults.info("| Promedio permanencia sistema: " + PPS + "|");
-        logResults.info("| Promedio espera cola: " + PEC + "|");
-        logResults.info("| Promedio tiempo atención: " + PTA + "|");
+        logResults.info("| Promedio permanencia sistema: " + new DecimalFormat("##.##").format(PPS / 60) + " en minutos |");
+        logResults.info("| Promedio espera cola: " + new DecimalFormat("##.##").format(PEC / 60) + " en minutos |");
+        logResults.info("| Promedio tiempo atención: " + PTA + " en segundos |");
         logResults.info("| Porcentaje de rechazos: " + PR + "% |");
         logResults.info("--------------RESULTS-----------------------");
     }
@@ -110,11 +111,10 @@ public class Simulation extends Variables{
     public void initConditions() {
         //Funciones
         startTA = 0;
-        endTA = 999;
-        maxTA = 1; //FIXME: No se si es 1
+        endTA = 24;
+        maxTA = 0.106;
 
-        //FIXME: El HV le debería asignar el tiempo final más el máximo tiempo de atención posible, pero podría ser más D:
-        HV = BigInteger.valueOf(Long.MAX_VALUE);//TF.add(BigInteger.valueOf(endTA)); //TF + endTA
+        HV = BigInteger.valueOf(Long.MAX_VALUE);
 
         T = BigInteger.valueOf(0);
         NS = 0;
@@ -171,11 +171,11 @@ public class Simulation extends Variables{
     public void printResults() {
         System.out.println("Cantidad de puestos (threads): " + N);
         System.out.println("Tamaño máximo de cola: " + MC);
-        System.out.println("Tiempo Final (en ms): " + TF);
+        System.out.println("Tiempo Final (en seg): " + TF);
         System.out.println("Cantidad de llegadas: " + NT);
-        System.out.println("Promedio permanencia sistema: " + PPS);
-        System.out.println("Promedio espera cola: " + PEC);
-        System.out.println("Promedio tiempo atención: " + PTA);
+        System.out.println("Promedio permanencia sistema: " + new DecimalFormat("##.##").format(PPS / 60) + " minutos");
+        System.out.println("Promedio espera cola: " + new DecimalFormat("##.##").format(PEC / 60) + " minutos");
+        System.out.println("Promedio tiempo atención: " + PTA + " segundos");
         System.out.println("Porcentaje de rechazos: " + PR + "%");
     }
     //endregion OPERA

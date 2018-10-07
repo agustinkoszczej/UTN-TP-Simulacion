@@ -23,8 +23,8 @@ public class Variables {
     int NS; //Número búsquedas en el sistema
 
     //RESULTADOS
-    int PPS; //Promedio permanencia sistema
-    int PEC; //Promedio espera cola
+    double PPS; //Promedio permanencia sistema
+    double PEC; //Promedio espera cola
     int PTA; //Promedio tiempo atención
     double PR; //Porcentaje Rechazo
 
@@ -52,6 +52,7 @@ public class Variables {
 
     int startTA;
     int endTA;
-    int maxTA;
+    double maxTA;
     //endregion
 }
+/** VIVA EL ANIME WACHO!*/
